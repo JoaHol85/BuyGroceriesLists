@@ -1,0 +1,90 @@
+﻿@page
+@model IndexModel
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@{
+    ViewData["Title"] = "Home page";
+    var user = await UserManager.GetUserAsync(User);
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+</div>
+<div class="text-center container">
+    <div class="row">
+
+        @if (user != null )
+        {
+            <div class="col-md-6">
+                <form method="post">
+                    <select id="SelectedListId" name="SelectedListId">
+                        @foreach (var list in Model.ListOfProductLists)
+                        {
+                            <option value="@list.ID">@list.Name</option>
+                        }
+                    </select>
+                    <button class="btn btn-primary" type="submit">Visa Lista</button>
+                </form>
+            </div>
+        }
+
+        @if (Model.ListOfProducts != null)
+        {
+            <div class="col-md-6">
+                <table class="table-bordered table-dark" style="margin-left:auto;margin-right:auto;">
+                    <tr>
+                        <th width="100">Antal:</th>
+                        <th width="300">Vara:</th>
+                        <th width="100">Köpt:</th>
+                        <th width="100">Köpt?:</th>
+                        <th width="100">Ta Bort:</th>
+                    </tr>
+                    @foreach (var product in Model.ListOfProducts)
+                    {
+                        <tr>
+                            <td>@product.Amount</td>
+                            <td>@product.Name</td>
+                            <td>
+                                @Model.BoughtOrNot(product.Bought)
+                            </td>
+                            @if (user != null && product.Bought == false)
+                            {
+                                <td>
+                                    <a href="?boughtproductid=@product.ID" type="submit" class="btn btn-primary">Köpt</a>
+                                </td>
+                            }
+                            else
+                            {
+                                <td></td>
+                            }
+                            @if (user != null)
+                            {
+                                @if (user.Id != null && user.Id == product.UserID)
+                                {
+                                    <td>
+                                        <a href="?deleteproductid=@product.ID" type="submit" class="btn btn-primary">Ta Bort</a>
+                                    </td>
+                                }
+                            }
+                        </tr>
+                    }
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+@*@if (user != null)
+{
+    <div class="text-center">
+        <form method="post" class="form-group">
+            <label>Vara:</label><br />
+            <input type="text" autofocus asp-for="@Model.product.Name" name="Name" placeholder="Varunamn" id="Name"/><br />
+            <label>Antal:</label><br />
+            <input type="number" asp-for="@Model.product.Amount" name="Amount" placeholder="Antal" id="Amount "/><br />
+            <input type="hidden" name="userId" id="userId" value="@user.Id" asp-for="@Model.product.UserID" />
+
+            <button class="btn btn-primary" type="submit" id="SaveProduct">Lägg till</button>
+        </form>
+    </div>
+}*@

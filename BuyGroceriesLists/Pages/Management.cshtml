@@ -1,0 +1,174 @@
+﻿@page
+@model BuyGroceriesLists.Pages.ManagementModel
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+@{
+    var user = await UserManager.GetUserAsync(User);
+}
+
+
+@if (user == null) 
+{
+    <h3 class="text-center">Logga in för att använda denna sida!</h3>
+}
+
+@if (user != null) 
+{
+    <div class="container">
+        <div class="row">
+
+
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h3 class="text-center">Skapa Lista</h3>
+                    <form method="post" asp-page-handler="CreateList">
+                        <label>Namn:</label><br />
+                        <input type="text" asp-for="@Model.ProductList.Name" placeholder="Namn på listan" required/><br />
+                        <input type="hidden" asp-for="@Model.ProductList.CreatedByUserId" value="@user.Id" /><br />
+                        <button class="btn btn-primary" type="submit">Skapa Lista</button>
+                    </form>
+                </div>
+            </div>
+
+
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h3 class="text-center">Lägg till produkt i lista</h3>
+                    <form method="post" asp-page-handler="AddProduct">
+                        <select name="BuyListId" id="BuyListId">
+                            @foreach (var list in Model.ListOfProductLists)
+                            {
+                                <option value="@list.ID" >@list.Name</option>
+                            }
+                        </select>
+
+                        <label>Vara:</label><br />
+                        <input type="text" autofocus asp-for="@Model.Product.Name" name="Name" placeholder="Varunamn" id="Name" required /><br />
+                        <label>Antal:</label><br />
+                        <input type="number" asp-for="@Model.Product.Amount" name="Amount" placeholder="Antal" id="Amount " /><br />
+                        <input type="hidden" name="userId" id="userId" value="@user.Id" asp-for="@Model.Product.UserID" />
+                        <button class="btn btn-primary" type="submit" id="SaveProduct">Lägg till</button>
+                    </form>
+
+                </div>
+            </div>
+
+
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h3 class="text-center">Skapa grupp</h3>
+                    <form method="post" asp-page-handler="CreateGroup">
+                        <label>Välj Lista för gruppen:</label><br />
+                        <select name="BuyListId" id="BuyListId">
+                            @foreach (var list in Model.ListOfAllProductLists)
+                            {
+                                <option value="@list.ID" >@list.Name</option>       // asp-for="" prova och ta bort kod i koden bakom.
+                            }
+                        </select><br />
+                        <label>Namn på grupp:</label><br />
+                        <input type="text" asp-for="@Model.UserGroup.Name" required/><br />
+                        <label>Skapa Lösenord:</label>
+                        <input type="password" asp-for="@Model.UserGroup.Password" required /> <br />
+                        <input type="hidden" asp-for="@Model.UserGroup.CreatedByUserId" value="@user.Id" /><br />
+                        <button type="submit" class="btn btn-primary">Skapa Grupp</button>
+                    </form>
+                </div>
+            </div>
+
+
+            <div class="col-md-3">
+                <div class="text-center">
+                    <h3 class="text-center">Lägg till dig i grupp</h3>
+                    <form method="post" asp-page-handler="AddToGroup">
+                        <select name="SelectedGroupId" id="SelectedGroupId">
+                            @foreach (var group in Model.ListOfUserGroups)
+                            {
+                                <option value="@group.ID">@group.Name</option>   // asp-for="" prova och ta bort kod i koden bakom.
+                            }
+                        </select><br />
+                        <label>Lösenord: <small>@Model.PasswordErrorMessage</small></label><br />
+                        <input type="password" name="AddUserToGroupPassword" id="AddUserToGroupPassword" required /> <br />
+                        <input type="hidden" asp-for="@Model.Member.UserId" value="@user.Id" />
+                        <button class="btn btn-primary" type="submit">Lägg till</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3 class="text-center">Ta Bort Lista</h3>
+                    <table>
+                        <tr>
+                            <th>Lista:</th>
+                            <th>Ta Bort:</th>
+                        </tr>
+                        @foreach (var item in Model.ListOfUserLists)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td><a href="?DeleteListId=@item.ID" class="btn btn-primary">Ta Bort</a></td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3>Ta bort grupp</h3>
+                    <table>
+                        <tr>
+                            <th>Lista:</th>
+                            <th>Ta Bort:</th>
+                        </tr>
+                        @foreach (var item in Model.ListOfCreatedUserGroups)
+                        {
+                            <tr>
+                                <td>@item.Name</td>
+                                <td><a href="?DeleteGroupId=@item.ID" class="btn btn-primary">Ta Bort</a></td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="col-md-4">
+                <div class="text-center">
+                    <h3>Ta bort mig ur grupp</h3>
+                    <table>
+                        <tr>
+                            <th>Gruppnamn:</th>
+                            <th>Ta bort mig ur grupp</th>
+                        </tr>
+                        @foreach (var item in Model.ListOfGroupsMemberIn)
+                        {
+                            <tr>
+                                <td>@item.Group.Name</td>
+                                <td><a class="btn btn-primary" href="?DeleteFromGroupId=@item.ID">Ta bort</a></td>
+                            </tr>
+                        }
+                    </table>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+}
